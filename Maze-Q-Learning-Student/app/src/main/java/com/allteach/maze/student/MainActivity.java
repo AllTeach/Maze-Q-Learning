@@ -9,6 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * Starter screen. The random demo proves that the maze visualization works
+ * before learning is implemented. Students later replace that demonstration
+ * with a Trainer running on a background Thread.
+ */
 public final class MainActivity extends AppCompatActivity {
     private MazeView mazeView; private TextView status; private final MazeEnvironment maze=new MazeEnvironment(); private final Random random=new Random(9);
     @Override public void onCreate(Bundle b){super.onCreate(b);LinearLayout root=new LinearLayout(this);root.setPadding(24,24,24,24);root.setOrientation(LinearLayout.VERTICAL);status=new TextView(this);mazeView=new MazeView(this);Button train=new Button(this);train.setText("הריצו בסיס אקראי");train.setOnClickListener(v->randomDemo());Button reset=new Button(this);reset.setText("איפוס");reset.setOnClickListener(v->{mazeView.setPath(new ArrayList<Integer>());status.setText("מוכנים למשימות TODO ב-MazeAgent.");});root.addView(status);root.addView(mazeView,new LinearLayout.LayoutParams(-1,0,1));root.addView(train);root.addView(reset);setContentView(root);status.setText("גרסת תלמיד: המבוך עובד; המדיניות כרגע אקראית עד למימוש TODO.");}

@@ -5,7 +5,11 @@ import java.util.List;
 
 /**
  * Student integration task: connects the environment and MazeAgent.
- * The starter app deliberately uses a random demonstration until this class is implemented.
+ *
+ * This class does not decide the maze rules and does not draw pixels. Its only
+ * job is to repeat the learning conversation: state -> action -> transition ->
+ * Q update. The starter app deliberately uses a random demonstration until
+ * this class is implemented.
  */
 public final class Trainer {
     public static final int MAX_STEPS_PER_EPISODE = 80;
@@ -31,6 +35,10 @@ public final class Trainer {
      *
      * Count goal arrivals and return a Result. Do not update Android Views here:
      * training must remain pure Java so it is testable and can run off the UI thread.
+     *
+     * The old row/col must be supplied to updateQ before assigning row/col from
+     * the transition. A terminal transition has no valid next action, so pass an
+     * empty next-action list and rely on the terminal flag.
      */
     public Result train(int episodes) {
         int goals = 0;
@@ -44,6 +52,10 @@ public final class Trainer {
      * Add every visited state as row * MazeEnvironment.COLS + col. Stop at a
      * terminal state. If a state repeats, or the step cap is reached, return
      * an empty list: that makes a policy cycle visible in the UI.
+     *
+     * This method is an evaluation, not training: never call chooseAction
+     * because it sometimes explores randomly. Instead find the best legal Q
+     * action using the same tie rule as the greedy branch of chooseAction.
      */
     public List<Integer> greedyPath() {
         return new ArrayList<>();
