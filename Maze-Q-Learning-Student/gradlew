@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+set -eu
+cd "$(dirname "$0")"
+V=8.7; D="${GRADLE_USER_HOME:-$HOME/.gradle}/wrapper/dists/gradle-$V-bin"
+G="$D/gradle-$V/bin/gradle"
+if [ ! -x "$G" ]; then mkdir -p "$D"; curl -fsSL "https://services.gradle.org/distributions/gradle-$V-bin.zip" -o "$D/g.zip"; unzip -q "$D/g.zip" -d "$D"; rm "$D/g.zip"; fi
+exec "$G" "$@"
