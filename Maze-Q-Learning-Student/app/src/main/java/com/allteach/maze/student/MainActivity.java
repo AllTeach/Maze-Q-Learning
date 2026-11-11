@@ -15,7 +15,74 @@ import java.util.Random;
  * with a Trainer running on a background Thread.
  */
 public final class MainActivity extends AppCompatActivity {
-    private MazeView mazeView; private TextView status; private final MazeEnvironment maze=new MazeEnvironment(); private final Random random=new Random(9);
-    @Override public void onCreate(Bundle b){super.onCreate(b);LinearLayout root=new LinearLayout(this);root.setPadding(24,24,24,24);root.setOrientation(LinearLayout.VERTICAL);status=new TextView(this);mazeView=new MazeView(this);Button train=new Button(this);train.setText("הריצו בסיס אקראי");train.setOnClickListener(v->randomDemo());Button reset=new Button(this);reset.setText("איפוס");reset.setOnClickListener(v->{mazeView.setPath(new ArrayList<Integer>());status.setText("מוכנים למשימות TODO ב-MazeAgent.");});root.addView(status);root.addView(mazeView,new LinearLayout.LayoutParams(-1,0,1));root.addView(train);root.addView(reset);setContentView(root);status.setText("גרסת תלמיד: המבוך עובד; המדיניות כרגע אקראית עד למימוש TODO.");}
-    private void randomDemo(){List<Integer> path=new ArrayList<>();int r=0,c=0;for(int i=0;i<30&&!maze.isTerminal(r,c);i++){path.add(r*5+c);List<Integer> legal=maze.legalActions(r,c);MazeEnvironment.Transition t=maze.step(r,c,legal.get(random.nextInt(legal.size())));r=t.row;c=t.col;}path.add(r*5+c);mazeView.setPath(path);status.setText("זהו בסיס אקראי, לא Q-learning. השלימו TODO ואז החליפו את ההדגמה באימון.");}
+    private static final int RANDOM_DEMO_STEP_LIMIT = 30;
+
+    private final MazeEnvironment maze = new MazeEnvironment();
+    private final Random random = new Random(9);
+    private MazeView mazeView;
+    private TextView status;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        LinearLayout root = new LinearLayout(this);
+        root.setPadding(24, 24, 24, 24);
+        root.setOrientation(LinearLayout.VERTICAL);
+
+        status = new TextView(this);
+        mazeView = new MazeView(this);
+
+        Button randomDemoButton = new Button(this);
+        randomDemoButton.setText("הדגמה אקראית (עדיין לא לומד)");
+        randomDemoButton.setOnClickListener(view -> showRandomDemo());
+
+        Button resetButton = new Button(this);
+        resetButton.setText("איפוס תצוגה");
+        resetButton.setOnClickListener(view -> resetDisplay());
+
+        root.addView(status);
+        root.addView(mazeView, new LinearLayout.LayoutParams(-1, 0, 1));
+        root.addView(randomDemoButton);
+        root.addView(resetButton);
+        setContentView(root);
+
+        status.setText("גרסת תלמיד: המבוך והתצוגה עובדים. "
+                + "הלחצן מציג מסלול אקראי בלבד; הוא אינו מאמן ואינו משתפר. "
+                + "אחרי השלמת TODOs מחליפים אותו באימון באמצעות Trainer.");
+    }
+
+    private void resetDisplay() {
+        mazeView.setPath(new ArrayList<Integer>());
+        status.setText("התצוגה אופסה. עדיין אין למידה עד שתממשו את MazeAgent ואת Trainer.");
+    }
+
+    private void showRandomDemo() {
+        List<Integer> path = new ArrayList<>();
+        int row = MazeEnvironment.START_ROW;
+        int col = MazeEnvironment.START_COL;
+
+        for (int step = 0; step < RANDOM_DEMO_STEP_LIMIT; step++) {
+            path.add(encodeState(row, col));
+            if (maze.isTerminal(row, col)) {
+                break;
+            }
+
+            List<Integer> legalActions = maze.legalActions(row, col);
+            int randomAction = legalActions.get(random.nextInt(legalActions.size()));
+            MazeEnvironment.Transition transition = maze.step(row, col, randomAction);
+
+            row = transition.row;
+            col = transition.col;
+        }
+
+        path.add(encodeState(row, col));
+        mazeView.setPath(path);
+        status.setText("זו הדגמה אקראית בלבד: לחיצה נוספת עשויה לתת מסלול אחר. "
+                + "הסוכן לא שומר Q-values, ולכן אינו מתקדם ואינו לומד.");
+    }
+
+    private int encodeState(int row, int col) {
+        return row * MazeEnvironment.COLS + col;
+    }
 }
